@@ -122,4 +122,4 @@ define KernelPackage/qca-ssdk-hnat/install
 endef
 
 $(eval $(call KernelPackage,qca-ssdk-nohnat))
-$(eval $(call KernelPackage,qca-ssdk-hnat))
+#$(eval $(call KernelPackage,qca-ssdk-hnat))
