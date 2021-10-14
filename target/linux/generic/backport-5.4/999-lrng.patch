@@ -1,0 +1,30 @@
+index df0fc99..dd5c070 100644
+--- a/drivers/char/Kconfig
++++ b/drivers/char/Kconfig
+@@ -219,7 +219,7 @@ config NWFLASH
+ 	  If you're not sure, say N.
+ 
+ source "drivers/char/hw_random/Kconfig"
+-
++source "drivers/char/lrng/Kconfig"
+ config NVRAM
+ 	tristate "/dev/nvram support"
+ 	depends on X86 || HAVE_ARCH_NVRAM_OPS
+@@ -559,4 +559,4 @@ config RANDOM_TRUST_BOOTLOADER
+ 	device randomness. Say Y here to assume the entropy provided by the
+ 	booloader is trustworthy so it will be added to the kernel's entropy
+ 	pool. Otherwise, say N here so it will be regarded as device input that
+-	only mixes the entropy pool.
+\ No newline at end of file
++	only mixes the entropy pool.
+index 7c5ea6f..3a6b5fe 100644
+--- a/drivers/char/Makefile
++++ b/drivers/char/Makefile
+@@ -28,6 +28,7 @@ obj-$(CONFIG_NVRAM)		+= nvram.o
+ obj-$(CONFIG_TOSHIBA)		+= toshiba.o
+ obj-$(CONFIG_DS1620)		+= ds1620.o
+ obj-$(CONFIG_HW_RANDOM)		+= hw_random/
++obj-$(LRNG)			+= lrng/
+ obj-$(CONFIG_PPDEV)		+= ppdev.o
+ obj-$(CONFIG_NWBUTTON)		+= nwbutton.o
+ obj-$(CONFIG_NWFLASH)		+= nwflash.o

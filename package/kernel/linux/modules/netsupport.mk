@@ -949,6 +949,31 @@ endef
 
 $(eval $(call KernelPackage,tcp-bbr))
 
+define KernelPackage/tcp-bbrplus
+  SUBMENU:=$(NETWORK_SUPPORT_MENU)
+  TITLE:=bbrplus TCP congestion control
+  DEPENDS:=+kmod-sched
+  KCONFIG:= \
+	CONFIG_TCP_CONG_ADVANCED=y \
+	CONFIG_TCP_CONG_bbrplus=m
+  FILES:=$(LINUX_DIR)/net/ipv4/tcp_bbrplus.ko
+  AUTOLOAD:=$(call AutoLoad,74,tcp_bbrplus)
+endef
+
+define KernelPackage/tcp-bbrplus/description
+ Kernel module for bbrplus (Bottleneck Bandwidth and RTT) TCP congestion
+ control. It requires the fq ("Fair Queue") pacing packet scheduler.
+ For kernel 4.13+, TCP internal pacing is implemented as fallback.
+endef
+
+TCP_bbrplus_SYSCTL_CONF:=sysctl-tcp-bbrplus.conf
+
+define KernelPackage/tcp-bbrplus/install
+	$(INSTALL_DIR) $(1)/etc/sysctl.d
+	$(INSTALL_DATA) ./files/$(TCP_bbrplus_SYSCTL_CONF) $(1)/etc/sysctl.d/12-tcp-bbrplus.conf
+endef
+
+$(eval $(call KernelPackage,tcp-bbrplus))
 
 define KernelPackage/tcp-hybla
   SUBMENU:=$(NETWORK_SUPPORT_MENU)

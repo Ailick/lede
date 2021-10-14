@@ -1,0 +1,140 @@
+diff --git a/kernel/sched/fair.c b/kernel/sched/fair.c
+index c99fc326ec24..71c27133c53c 100644
+--- a/kernel/sched/fair.c
++++ b/kernel/sched/fair.c
+@@ -29,7 +29,7 @@
+ #include <trace/events/sched.h>
+ 
+ #ifdef CONFIG_CACULE_SCHED
+-unsigned int __read_mostly cacule_max_lifetime		= 22000; // in ms
++unsigned int __read_mostly cacule_max_lifetime		= 4000; // in ms
+ unsigned int __read_mostly interactivity_factor		= 32768;
+ 
+ unsigned int __read_mostly cache_factor			= 13107;
+@@ -39,6 +39,8 @@
+ unsigned int __read_mostly starve_divisor		= 3000000; // 3ms
+ #endif
+ 
++#include <linux/math64.h>
++
+ /*
+  * Targeted preemption latency for CPU-bound tasks:
+  *
+@@ -593,6 +595,7 @@
+ {
+ 	u64 l_se, vr_se, sleep_se = 1ULL, u64_factor_m, _2m;
+ 	unsigned int score_se;
++	u32 r_se_rem;
+ 
+ 	/*
+ 	 * in case of vruntime==0, logical OR with 1 would
+@@ -608,9 +611,19 @@
+ 		sleep_se = (l_se - vr_se) | 1;
+ 
+ 	if (sleep_se >= vr_se)
+-		score_se = u64_factor_m / (sleep_se / vr_se);
++		score_se = div_u64_rem
++			(
++				u64_factor_m, div_u64_rem
++				(
++					sleep_se, vr_se
++				, &r_se_rem)
++			, &r_se_rem);
+ 	else
+-		score_se = _2m - (u64_factor_m / (vr_se / sleep_se));
++		score_se = _2m - (
++			div_u64_rem(u64_factor_m, (
++					div_u64_rem(vr_se, sleep_se, &r_se_rem)
++				), &r_se_rem)
++			);
+ 
+ 	return score_se;
+ }
+@@ -638,6 +638,7 @@ calc_cache_score(u64 now, struct cacule_node *cn)
+ 	u64 u64_factor_m = cache_factor;
+ 	u64 _2m = u64_factor_m << 1;
+ 	unsigned int score;
++	u32 r_se_rem;
+ 
+ 	if (!cache_factor)
+ 		return 0;
+@@ -648,10 +648,19 @@ calc_cache_score(u64 now, struct cacule_node *cn)
+ 	cache_period = (now - se->exec_start) | 1;
+ 
+ 	if (c_div >= cache_period)
+-		score = u64_factor_m / (c_div / cache_period);
++		score = div_u64_rem
++			(
++				u64_factor_m, div_u64_rem
++				(
++					c_div, cache_period
++				, &r_se_rem)
++			, &r_se_rem);
+ 	else
+-		score = _2m - (u64_factor_m / (cache_period / c_div));
+-
++		score = _2m - (
++			div_u64_rem(u64_factor_m, (
++					div_u64_rem(cache_period, c_div, &r_se_rem)
++				), &r_se_rem)
++			);
+ 	return score;
+ }
+ 
+@@ -674,6 +675,7 @@ calc_starve_score(u64 now, struct cacule_node *cn)
+ 	u64 u64_factor_m = starve_factor;
+ 	u64 _2m = u64_factor_m << 1;
+ 	unsigned int score;
++	u32 r_se_rem;
+ 
+ 	if (!starve_factor)
+ 		return 0;
+@@ -675,10 +686,19 @@ calc_starve_score(u64 now, struct cacule_node *cn)
+ 	starving = (now - cn->last_run) | 1;
+ 
+ 	if (s_div >= starving)
+-		score = _2m - (u64_factor_m / (s_div / starving));
++		score = _2m - (
++			div_u64_rem(u64_factor_m, (
++					div_u64_rem(s_div, starving, &r_se_rem)
++				), &r_se_rem)
++			);
+ 	else
+-		score = u64_factor_m / (starving / s_div);
+-
++		score = div_u64_rem
++			(
++				u64_factor_m, div_u64_rem
++				(
++					starving, s_div
++				, &r_se_rem)
++			, &r_se_rem);
+ 	return score;
+ }
+ 
+@@ -1086,6 +1099,7 @@
+ 	struct cacule_node *cn = &se->cacule_node;
+ 	u64 max_life_ns, life_time, old_hrrn_x;
+ 	s64 diff;
++	u32 rem;
+ 
+ 	/*
+ 	 * left shift 20 bits is approximately = * 1000000
+@@ -1102,7 +1116,7 @@
+ 		cn->vruntime &= YIELD_UNMARK;
+ 
+ 		// multiply life_time by 1024 for more precision
+-		old_hrrn_x = (life_time << 7) / ((cn->vruntime >> 3) | 1);
++		old_hrrn_x = div_u64_rem(life_time << 7, ((cn->vruntime >> 3) | 1), &rem);
+ 
+ 		// reset life to half max_life (i.e ~15s)
+ 		cn->cacule_start_time = now - (max_life_ns >> 1);
+@@ -1111,7 +1125,7 @@
+ 		if (old_hrrn_x == 0) old_hrrn_x = 1;
+ 
+ 		// reset vruntime based on old hrrn ratio
+-		cn->vruntime = (max_life_ns << 9) / old_hrrn_x;
++		cn->vruntime = div_u64_rem((max_life_ns << 9), old_hrrn_x, &rem);
+ 	}
+ }
+ #endif /* CONFIG_CACULE_SCHED */

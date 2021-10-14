@@ -22,7 +22,7 @@ PKG_CONFIG_DEPENDS:= \
 LUCI_TITLE:=LuCI support for Flow Offload / Shortcut-FE
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+pdnsd-alt \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_BBR_CCA:kmod-tcp-bbr \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_BBR_CCA:kmod-tcp-bbrplus \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_DNSFORWARDER:dnsforwarder \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_DNSPROXY:dnsproxy \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_OFFLOADING:kmod-ipt-offload \

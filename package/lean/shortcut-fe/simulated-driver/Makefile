@@ -33,7 +33,10 @@ define KernelPackage/shortcut-fe-drv
   SUBMENU:=Network Support
   DEPENDS:=@TARGET_ipq806x||TARGET_ipq807x +kmod-shortcut-fe
   KCONFIG:=CONFIG_NET_CLS_ACT=y \
-   	    CONFIG_XFRM=y
+	   CONFIG_NF_CONNTRACK_EVENTS=y \
+	   CONFIG_NF_CONNTRACK_TIMEOUT=y \
+	   CONFIG_SHORTCUT_FE=y \
+	   CONFIG_XFRM=y
   TITLE:=Simulated sfe driver for ECM
   FILES:=$(PKG_BUILD_DIR)/simulated-driver/shortcut-fe-drv.ko
 endef
@@ -42,12 +45,14 @@ define KernelPackage/shortcut-fe-drv/Description
 Simulated sfe driver which act as an adapter to convert message between a connection manager and the SFE core engine.
 endef
 
+PKG_EXTMOD_SUBDIRS=simulated-driver
+EXTRA_CFLAGS+="-DSFE_SUPPORT_IPV6"
+
 define Build/Compile
 	$(MAKE) $(PKG_JOBS) -C "$(LINUX_DIR)" \
 		$(KERNEL_MAKE_FLAGS) \
 		$(PKG_MAKE_FLAGS) \
 		M="$(PKG_BUILD_DIR)/simulated-driver" \
-		$(if $(CONFIG_IPV6),EXTRA_CFLAGS+="-DSFE_SUPPORT_IPV6" SFE_SUPPORT_IPV6=y,) \
 		EXTRA_CFLAGS="$(EXTRA_CFLAGS)" \
 		modules
 endef

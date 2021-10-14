@@ -669,6 +669,15 @@
  #include <net/netfilter/ipv4/nf_defrag_ipv4.h>
 --- a/frontends/ecm_front_end_ipv4.c
 +++ b/frontends/ecm_front_end_ipv4.c
+@@ -198,7 +198,7 @@ bool ecm_front_end_ipv4_interface_construct_set_and_hold(struct sk_buff *skb, ec
+ 		DEBUG_TRACE("%p: rt_route_iif: %d\n", rt, rt->rt_route_iif);
+ 		DEBUG_TRACE("%p: rt_iif: %d (%s)\n", rt, rt->rt_iif, rt_iif_dev->name);
+ #endif
+-		DEBUG_TRACE("%p: rt_gateway: %pI4\n", rt, &rt->rt_gateway);
++		DEBUG_TRACE("%p: rt_gateway: %pI4\n", rt, &rt->rt_uses_gateway);
+ 
+ 		DEBUG_INFO("ip_src_addr" ECM_IP_ADDR_DOT_FMT "\n", ECM_IP_ADDR_TO_DOT(ip_src_addr));
+ 		DEBUG_INFO("ip_src_addr_nat" ECM_IP_ADDR_DOT_FMT "\n", ECM_IP_ADDR_TO_DOT(ip_src_addr_nat));
 @@ -215,7 +215,7 @@ bool ecm_front_end_ipv4_interface_constr
  			 * behind a gateway.
  			 */

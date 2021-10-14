@@ -25,11 +25,18 @@ endef
 
 include $(INCLUDE_DIR)/kernel-defaults.mk
 
+PKG_EXTMOD_SUBDIRS=nat46/modules
+
 define Build/Compile
 	$(KERNEL_MAKE) M="$(PKG_BUILD_DIR)/nat46/modules" \
 		MODFLAGS="-DMODULE -mlong-calls" \
 		EXTRA_CFLAGS="-DNAT46_VERSION=\\\"$(PKG_SOURCE_VERSION)\\\"" \
 		modules
+endef
+
+define Build/InstallDev
+	$(INSTALL_DIR) $(1)/usr/include/nat46
+	$(CP) -rf $(PKG_BUILD_DIR)/nat46/modules/*.h $(1)/usr/include/nat46
 endef
 
 $(eval $(call KernelPackage,nat46))

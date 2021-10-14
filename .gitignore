@@ -15,6 +15,7 @@
 /files
 /overlay
 /package/feeds
+/package/ailick
 /package/openwrt-packages
 key-build*
 *.orig

@@ -44,6 +44,7 @@ define KernelPackage/qca-nss-ecm/Default
 	+TARGET_ipq_ipq50xx:kmod-qca-nss-drv \
 	+TARGET_ipq_ipq50xx_64:kmod-qca-nss-drv \
 	+iptables-mod-extra +kmod-ipt-conntrack \
+	+kmod-shortcut-fe-drv \
 	+kmod-pppoe @LINUX_5_4 \
 	+kmod-ipsec
   TITLE:=QCA NSS Enhanced Connection Manager (ECM)
@@ -70,7 +71,7 @@ define KernelPackage/qca-nss-ecm/Default/install
 	$(INSTALL_DATA) ./files/qca-nss-ecm.defaults $(1)/etc/uci-defaults/99-qca-nss-ecm
 	$(INSTALL_BIN) ./files/qca-nss-ecm.sysctl $(1)/etc/sysctl.d/qca-nss-ecm.conf
 ifeq ($(CONFIG_KERNEL_IPQ_MEM_PROFILE),256)
-	echo 'net.netfilter.nf_conntrack_max=2048' >> $(1)/etc/sysctl.d/qca-nss-ecm.conf
+	echo 'net.netfilter.nf_conntrack_max=4096' >> $(1)/etc/sysctl.d/qca-nss-ecm.conf
 endif
 ifeq ($(CONFIG_KERNEL_IPQ_MEM_PROFILE),512)
 	echo 'net.netfilter.nf_conntrack_max=8192' >> $(1)/etc/sysctl.d/qca-nss-ecm.conf
@@ -196,9 +197,9 @@ ifeq ($(filter $(CONFIG_KERNEL_IPQ_MEM_PROFILE), 256),)
 ECM_MAKE_OPTS+=ECM_XFRM_ENABLE=y
 endif
 
-# ifneq ($(CONFIG_PACKAGE_kmod-nat46),)
-# ECM_MAKE_OPTS+=ECM_INTERFACE_MAP_T_ENABLE=y
-# endif
+ifneq ($(CONFIG_PACKAGE_kmod-nat46),)
+ECM_MAKE_OPTS+=ECM_INTERFACE_MAP_T_ENABLE=y
+endif
 
 ifneq ($(CONFIG_PACKAGE_kmod-qca-nss-drv-ovpn-link),)
 ECM_MAKE_OPTS+=ECM_INTERFACE_OVPN_ENABLE=y
@@ -235,7 +236,6 @@ define Build/Compile
 		EXAMPLES_BUILD_PCC="$(CONFIG_QCA_NSS_ECM_EXAMPLES_PCC)" \
 		EXAMPLES_BUILD_MARK="$(CONFIG_QCA_NSS_ECM_EXAMPLES_MARK)" \
 		EXAMPLES_BUILD_OVS="$(CONFIG_QCA_NSS_ECM_OVS)" \
-		ECM_FRONT_END_SFE_ENABLE="$(CONFIG_QCA_ECM_SFE_SUPPORT)" \
 		modules
 endef
 

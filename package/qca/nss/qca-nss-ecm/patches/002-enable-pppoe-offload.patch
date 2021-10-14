@@ -1,0 +1,18 @@
+diff --git a/Makefile b/Makefile
+index 674273a..40870c5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -104,13 +104,6 @@ ccflags-$(ECM_INTERFACE_PPTP_ENABLE) += -DECM_INTERFACE_PPTP_ENABLE
+ # be enabled automatically
+ # #############################################################################
+ ECM_INTERFACE_PPP_ENABLE=y
+-ifeq "$(ECM_INTERFACE_PPPOE_ENABLE)" "n"
+-ifeq "$(ECM_INTERFACE_L2TPV2_ENABLE)" "n"
+-ifeq "$(ECM_INTERFACE_PPTP_ENABLE)" "n"
+-ECM_INTERFACE_PPP_ENABLE=n
+-endif
+-endif
+-endif
+ ccflags-$(ECM_INTERFACE_PPP_ENABLE) += -DECM_INTERFACE_PPP_ENABLE
+ 
+ # #############################################################################
